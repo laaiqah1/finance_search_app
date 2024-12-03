@@ -12,14 +12,23 @@ st.write("Ask about stock prices or financial data!")
 # User input for natural language query
 query = st.text_input("Enter your question (e.g., 'What is Apple's stock price?'):")
 
+import openai
+
 def process_query(query):
-    # Use OpenAI to interpret the query and extract the stock ticker
-    response = openai.Completion.create(
-        engine="gpt-3.5-turbo-instruct",  # Use 'gpt-3.5-turbo-instruct' or GPT-4 if available
-        prompt=f"Extract the stock ticker symbol or financial information needed from this query: {query}",
-        max_tokens=50
-    )
-    return response.choices[0].text.strip()
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # Use the appropriate model
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"Extract the stock ticker symbol from: {query}"}
+            ],
+            max_tokens=50
+        )
+        return response['choices'][0]['message']['content'].strip()
+    except Exception as e:
+        print(f"Error with OpenAI API: {e}")
+        return None
+
 
 # Function to get stock data
 def get_stock_price(ticker):
